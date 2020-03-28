@@ -1,7 +1,9 @@
 const puppeteer = require('puppeteer');
+const config = require('./credential.json');
 
 (async () => {
     const browser = await puppeteer.launch({
+        executablePath: "./node_modules/chromium/lib/chromium/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
         headless: false,
         slowMo: 30 // slow down by 30 ms
     });
@@ -19,30 +21,32 @@ const puppeteer = require('puppeteer');
     
     // enter email address
     await page.click('[id="email"]');
-    await page.keyboard.type('<your-email>', {delay: 0});
+    await page.keyboard.type(config.username, {delay: 0});
 
     // enter password
     await page.click('[id="pass"]');
-    await page.keyboard.type('<your-password>', {delay: 0});
+    await page.keyboard.type(config.password, {delay: 0});
 
     // click on Log In
     await page.click('[value="Log In"]');
 
-    await sleep(3000);
+    await sleep(15000);
+
+    console.log('Login Done');
 
     await page.goto('https://www.facebook.com/messages/');
     
     await page.click('[placeholder="Search Messenger"]');
 
-    await page.keyboard.type('<name-of-message-recipient>', {delay: 0});
+    await page.keyboard.type('Sakibul Mowla', {delay: 0});
 
-    await sleep(5000);
+    await sleep(10000);
 
     await page.keyboard.press('ArrowDown');
 
     await page.keyboard.press('Enter');
 
-    await page.keyboard.type('Hello!\n');
+    await page.keyboard.type('Hello From Biswa Bot!\n');
     
     await browser.close();
 })();
