@@ -1,5 +1,9 @@
 # fb-friend-filter
 
+Crete `credential.json` file in root directory by mimicking `credential-sample.json` file and populate the properties.
+
+___
+
 Run following in the reps to ignore `credential.json` local changes:
 
 ```
