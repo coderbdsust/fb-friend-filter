@@ -41,15 +41,57 @@ const config = require('./credential.json');
     // click on Log In
     await page.click('[value="Log In"]');
 
-    await sleep(15000);
+    await page.waitForNavigation({waitUntil: 'load'});
 
     console.log('Login Done');
+
+   // await sendMessage(page,'Biswajit Debath');
+
+    await page.click('[data-click="profile_icon"]');
+
+    await sleep(6000);
+    
+    await page.click('[data-tab-key="friends"]');
+    
+    await sleep(2000);
+
+    await autoScroll(page);
+    
+    await browser.close();
+})();
+
+const sleep = (ms = 1000) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function autoScroll(page) {
+    await page.evaluate(async () => {
+        await new Promise((resolve, reject) => {
+            let totalHeight = 0;
+            let distance = 100;
+            let timer = setInterval(() => {
+                let scrollHeight = document.body.scrollHeight;
+                window.scrollBy(0, distance);
+                totalHeight += distance;
+
+                if (totalHeight >= scrollHeight) {
+                    clearInterval(timer);
+                    resolve();
+                }
+            }, 1000);
+        });
+    });
+}
+
+const sendMessage = async (page, receiver) => {
+
+    await page.click('[data-click="home_icon"]');
 
     await page.goto('https://www.facebook.com/messages/');
     
     await page.click('[placeholder="Search Messenger"]');
 
-    await page.keyboard.type('Sakibul Mowla', {delay: 0});
+    await page.keyboard.type(receiver, {delay: 0});
 
     await sleep(10000);
 
@@ -57,11 +99,5 @@ const config = require('./credential.json');
 
     await page.keyboard.press('Enter');
 
-    await page.keyboard.type('Hello From Biswa Bot!\n');
-    
-    await browser.close();
-})();
-
-const sleep = (ms = 1000) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    await page.keyboard.type('Hello From Auto Bot!\n');
 }
