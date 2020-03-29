@@ -2,11 +2,22 @@ const puppeteer = require('puppeteer');
 const config = require('./credential.json');
 
 (async () => {
-    const browser = await puppeteer.launch({
-        executablePath: "./node_modules/chromium/lib/chromium/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
-        headless: false,
-        slowMo: 30 // slow down by 30 ms
-    });
+    let browser;
+    if (config.chromiumPath && config.chromiumPath !== '') {    
+        console.log('Custom chromium path found');
+        browser = await puppeteer.launch({
+            executablePath: config.chromiumPath,
+            headless: config.headless,
+            slowMo: 30 // slow down by 30 ms
+        });
+    } else {
+        console.log('Opening with default chromium path');
+        browser = await puppeteer.launch({
+            headless: config.headless,
+            slowMo: 30 // slow down by 30 ms
+        });
+    }
+    
 
     const context = browser.defaultBrowserContext();
     context.overridePermissions("https://www.facebook.com", ["notifications"]);
