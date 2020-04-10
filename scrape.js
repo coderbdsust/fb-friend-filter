@@ -17,7 +17,6 @@ const config = require('./credential.json');
             slowMo: 30 // slow down by 30 ms
         });
     }
-    
 
     const context = browser.defaultBrowserContext();
     context.overridePermissions("https://www.facebook.com", ["notifications"]);
@@ -25,11 +24,11 @@ const config = require('./credential.json');
     const page = await browser.newPage();
     await page.goto('https://facebook.com');
     await page.setViewport({
-        width: 1200,
-        height: 620,
+        width: 1500,
+        height: 1000,
         deviceScaleFactor: 1,
     });
-    
+
     // enter email address
     await page.click('[id="email"]');
     await page.keyboard.type(config.username, {delay: 0});
@@ -47,7 +46,9 @@ const config = require('./credential.json');
 
    // await sendMessage(page,'Biswajit Debath');
 
-    await page.click('[data-click="profile_icon"]');
+    // await page.click('[data-click="profile_icon"]');
+
+    await page.click("[href='/me/']");
 
     await sleep(6000);
     
