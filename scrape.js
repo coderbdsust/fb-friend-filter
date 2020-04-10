@@ -2,6 +2,8 @@ const puppeteer = require('puppeteer');
 const config = require('./credential.json');
 
 (async () => {
+    const startTime = Date.now();
+
     let browser;
     if (config.chromiumPath && config.chromiumPath !== '') {    
         console.log('Custom chromium path found');
@@ -40,38 +42,31 @@ const config = require('./credential.json');
     // click on Log In
     await page.click('[value="Log In"]');
 
+    await sleep(5000);
+
     await page.waitForNavigation({waitUntil: 'load'});
 
     console.log('Login Done');
 
     // await sendMessage(page,'Biswajit Debath');
 
-    await sleep(3000);
-    // old UI
-    // await page.click('[data-click="profile_icon"]');
-    // new UI
-    await page.click("[href='/me/']");
-
-    await sleep(3000);
-    // old UI
-    // await page.click('[data-tab-key="friends"]');
-    // new UI
-    await page.goto(page.url() + 'friends');
+    await page.goto('https://www.facebook.com/me/friends');
 
     await sleep(2000);
+
+    await autoScroll(page);
 
     const allHrefs = await page.$$eval('a', anchors => anchors.map(anchor => anchor.href));
     const ownerIdName = getOwnerIdName(page.url());
 
     const friendProfileHrefs = filterValidFriendProfileHrefs(allHrefs, ownerIdName);
 
-    console.log(allHrefs);
-    console.log('-------------------- VS -------------------');
-    console.log(friendProfileHrefs);
+    console.log(JSON.stringify(friendProfileHrefs, null, 4));
 
-    // await autoScroll(page);
-    
     await browser.close();
+
+    const endTime = Date.now()
+    console.log("Time Taken: " + (endTime - startTime) / 1000.00 + " seconds.");
 })();
 
 const sleep = (ms = 1000) => {
@@ -108,7 +103,14 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
             'photo',
             'friends',
             'groupslanding',
-            'messages'
+            'messages',
+            'mutual_friends',
+            'settings',
+            'notifications',
+            'profile',
+            'find-friends',
+            'notes',
+            '?'
         ];
 
         const matchesHref = feature => href.includes('/' + feature);
@@ -132,7 +134,7 @@ async function autoScroll(page) {
     await page.evaluate(async () => {
         await new Promise((resolve, reject) => {
             let totalHeight = 0;
-            let distance = 100;
+            let distance = 400;
             let timer = setInterval(() => {
                 let scrollHeight = document.body.scrollHeight;
                 window.scrollBy(0, distance);
