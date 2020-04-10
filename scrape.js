@@ -44,16 +44,22 @@ const config = require('./credential.json');
 
     console.log('Login Done');
 
-   // await sendMessage(page,'Biswajit Debath');
+    // await sendMessage(page,'Biswajit Debath');
 
+    // old UI
     // await page.click('[data-click="profile_icon"]');
 
+    // new UI
+    await sleep(3000);
     await page.click("[href='/me/']");
+    
+    // old UI
+    // await page.click('[data-tab-key="friends"]');
+    
+    // new UI
+    await sleep(3000);
+    await page.goto(page.url() + 'friends');
 
-    await sleep(6000);
-    
-    await page.click('[data-tab-key="friends"]');
-    
     await sleep(2000);
 
     await autoScroll(page);
