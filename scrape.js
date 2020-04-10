@@ -46,18 +46,16 @@ const config = require('./credential.json');
 
     // await sendMessage(page,'Biswajit Debath');
 
+    await sleep(3000);
     // old UI
     // await page.click('[data-click="profile_icon"]');
-
     // new UI
-    await sleep(3000);
     await page.click("[href='/me/']");
-    
+
+    await sleep(3000);
     // old UI
     // await page.click('[data-tab-key="friends"]');
-    
     // new UI
-    await sleep(3000);
     await page.goto(page.url() + 'friends');
 
     await sleep(2000);
@@ -100,7 +98,6 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
             'groups',
             'gaming',
             'bookmarks',
-            'me',
             'memories',
             'videos',
             'groups',
@@ -114,7 +111,7 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
             'messages'
         ];
 
-        const matchesHref = feature => href.includes('/' + feature + '/');
+        const matchesHref = feature => href.includes('/' + feature);
         return features.some(matchesHref);
     };
 
