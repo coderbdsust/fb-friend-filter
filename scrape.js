@@ -4,6 +4,8 @@ const config = require('./credential.json');
 (async () => {
     const startTime = Date.now();
 
+    console.log("Starting Execution at", Date(startTime));
+
     let browser;
     if (config.chromiumPath && config.chromiumPath !== '') {    
         console.log('Custom chromium path found');
@@ -42,30 +44,34 @@ const config = require('./credential.json');
     // click on Log In
     await page.click('[value="Log In"]');
 
-    await sleep(5000);
+    await sleep(10000);
 
-    await page.waitForNavigation({waitUntil: 'load'});
+    console.log('Login Done!!!');
 
-    console.log('Login Done');
-
-    // await sendMessage(page,'Biswajit Debath');
-
+    // goto friend list
     await page.goto('https://www.facebook.com/me/friends');
 
-    await sleep(2000);
+    await sleep(3000);
 
     await autoScroll(page);
+
+    console.log('Starting to fetch allHrefs');
 
     const allHrefs = await page.$$eval('a', anchors => anchors.map(anchor => anchor.href));
     const ownerIdName = getOwnerIdName(page.url());
 
+    console.log('allHrefs length:', allHrefs.length);
+
     const friendProfileHrefs = filterValidFriendProfileHrefs(allHrefs, ownerIdName);
 
+    console.log('friendProfileHrefs length:', friendProfileHrefs.length);
     console.log(JSON.stringify(friendProfileHrefs, null, 4));
 
     await browser.close();
 
-    const endTime = Date.now()
+    const endTime = Date.now();
+
+    console.log("Ending Execution at ", Date(endTime));
     console.log("Time Taken: " + (endTime - startTime) / 1000.00 + " seconds.");
 })();
 
