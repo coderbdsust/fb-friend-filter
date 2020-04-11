@@ -1,5 +1,6 @@
 require('console-stamp')(console, { pattern: 'dd/mm/yyyy HH:MM:ss.l' });
 
+const fs = require('fs');
 const puppeteer = require('puppeteer');
 const config = require('./credential.json');
 
@@ -66,6 +67,13 @@ const config = require('./credential.json');
 
     console.log('friendProfileHrefs length:', friendProfileHrefs.length);
     console.log(JSON.stringify(friendProfileHrefs, null, 4));
+
+    // writing friend profile links to a file
+    const jsonProfileLinks = {
+        profiles: friendProfileHrefs
+    };
+
+    fs.writeFileSync('friend-profiles.json', JSON.stringify(jsonProfileLinks, null, 4));
 
     await browser.close();
 
