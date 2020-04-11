@@ -139,22 +139,26 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
 async function autoScroll(page) {
     console.log("Starting autoScroll...");
 
-    await page.evaluate(async () => {
-        await new Promise((resolve, reject) => {
-            let totalHeight = 0;
-            let distance = 400;
-            let timer = setInterval(() => {
-                let scrollHeight = document.body.scrollHeight;
-                window.scrollBy(0, distance);
-                totalHeight += distance;
+    try {
+        await page.evaluate(async () => {
+            await new Promise((resolve, reject) => {
+                let totalHeight = 0;
+                let distance = 400;
+                let timer = setInterval(() => {
+                    let scrollHeight = document.body.scrollHeight;
+                    window.scrollBy(0, distance);
+                    totalHeight += distance;
 
-                if (totalHeight >= scrollHeight) {
-                    clearInterval(timer);
-                    resolve();
-                }
-            }, 1000);
+                    if (totalHeight >= scrollHeight) {
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, 1000);
+            });
         });
-    });
+    } catch (reason) {
+        console.error(reason);
+    }
 }
 
 const sendMessage = async (page, receiver) => {
