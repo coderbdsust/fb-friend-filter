@@ -3,140 +3,25 @@ const fs = require('fs');
 const puppeteer = require('puppeteer');
 const config = require('./credential.json');
 
-(async () => {
-
-    console.log("Starting Execution...");
-
-    let profileData = {};
-    const profileFilePath = `friend_${config.username}.json`;
-
-    try {
-        if (fs.existsSync(profileFilePath)) {
-            //file exists
-            console.log('Reading From Existing File.');
-            let rawdata = fs.readFileSync(profileFilePath);
-            profileData = JSON.parse(rawdata);
-        } else {
-            console.log('No Existing File Found!!!');
-        }
-    } catch (err) {
-        console.error(err);
-    }
-
-    let browser;
-    if (config.chromiumPath && config.chromiumPath !== '') {    
-        console.log('Custom chromium path found');
-        browser = await puppeteer.launch({
-            executablePath: config.chromiumPath,
-            headless: config.headless,
-            slowMo: 0 // slow down by 30 ms
-        });
-    } else {
-        console.log('Opening with default chromium path');
-        browser = await puppeteer.launch({
-            headless: config.headless,
-            slowMo: 0 // slow down by 30 ms
-        });
-    }
-
-    const context = browser.defaultBrowserContext();
-    context.overridePermissions("https://www.facebook.com", ["notifications"]);
-
-    const page = await browser.newPage();
-    await page.goto('https://facebook.com');
-    await page.setViewport({
-        width: 1500,
-        height: 1000,
-        deviceScaleFactor: 1,
-    });
-
-    // enter email address
-    await page.click('[id="email"]');
-    await page.keyboard.type(config.username, {delay: 0});
-
-    // enter password
-    await page.click('[id="pass"]');
-    await page.keyboard.type(config.password, {delay: 0});
-
-    // click on Log In
-    await page.click('[value="Log In"]');
-
-   // await sleep(10000);
-    console.log('Login Done!!!');
-
-    await page.waitForSelector("[href='/me/']",{visiable: true});
-
-    // goto friend list
-    await page.goto('https://www.facebook.com/me/friends');
-
-    await sleep(3000);
-
-    if (!profileData.allProfileFound) {
-
-        const startDate = new Date();
-
-        // Do your operations
-        await autoScroll(page);
-
-        const endDate = new Date();
-
-        const seconds = (endDate.getTime() - startDate.getTime()) / 1000;
-
-        console.log('Starting to fetch allHrefs');
-
-        const allHrefs = await page.$$eval('a', anchors => anchors.map(anchor => anchor.href));
-        const ownerIdName = getOwnerIdName(page.url());
-
-        console.log('allHrefs length:', allHrefs.length);
-
-        const friendProfileHrefs = filterValidFriendProfileHrefs(allHrefs, ownerIdName);
-
-        // writing friend profile links to a file
-        if (friendProfileHrefs && friendProfileHrefs.length > 0) {
-            profileData.allProfileFound = true;
-        } else {
-            profileData.allProfileFound = false;
-        }
-
-        profileData.profileLinkSearchTime = seconds;
-        profileData.profiles = friendProfileHrefs;
-      
-        console.log('Writig to file start');
-
-        fs.writeFileSync(profileFilePath, JSON.stringify(profileData, null, 4));
-
-        console.log('Writig to file end');
-
-    } else {
-        console.log('All friend profile link retrieved already');
-    }
-
-    await browser.close();
-
-    console.log("Ending Execution.");
-})();
-
-const sleep = (ms = 1000) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+const sleep = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getOwnerIdName = (url) => {
     // url = 'https://www.facebook.com/SakibulMowlaJesi/friends'
     const ownerIdName = url.split('/')[3];
     return ownerIdName;
-}
+};
 
 const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
-    console.log("Starting filterValidFriendProfileHrefs...");
+    console.log('Starting filterValidFriendProfileHrefs...');
 
     const uniqueFriendProfileHrefs = new Set();
 
-    const validLink = href => !!href;
-    const isMutualFriendPage = href => href.includes('friends_mutual');
-    const isHomePage = href => href === 'https://www.facebook.com/';
-    const isOwnerRelatedPage = href => href.includes(ownerIdName);
+    const validLink = (href) => !!href;
+    const isMutualFriendPage = (href) => href.includes('friends_mutual');
+    const isHomePage = (href) => href === 'https://www.facebook.com/';
+    const isOwnerRelatedPage = (href) => href.includes(ownerIdName);
     const isFeaturePage = (href) => {
-        const features = [ 
+        const features = [
             '?',
             'bookmarks',
             'donate',
@@ -164,33 +49,33 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
             'watch'
         ];
 
-        const matchesHref = feature => href.includes('/' + feature);
+        const matchesHref = (feature) => href.includes(`/${feature}`);
         return features.some(matchesHref);
     };
 
     allHrefs.forEach((href) => {
-        if (validLink(href) &&
-            !isMutualFriendPage(href) &&
-            !isHomePage(href) &&
-            !isOwnerRelatedPage(href) &&
-            !isFeaturePage(href)) {
+        if (validLink(href)
+            && !isMutualFriendPage(href)
+            && !isHomePage(href)
+            && !isOwnerRelatedPage(href)
+            && !isFeaturePage(href)) {
             uniqueFriendProfileHrefs.add(href);
         }
     });
 
-    return [ ...uniqueFriendProfileHrefs ];
-}
+    return [...uniqueFriendProfileHrefs];
+};
 
 async function autoScroll(page) {
-    console.log("Starting autoScroll...");
+    console.log('Starting autoScroll...');
 
     try {
         await page.evaluate(async () => {
-            await new Promise((resolve, reject) => {
+            await new Promise((resolve) => {
                 let totalHeight = 0;
-                let distance = 350;
-                let timer = setInterval(() => {
-                    let scrollHeight = document.body.scrollHeight;
+                const distance = 350;
+                const timer = setInterval(() => {
+                    const { scrollHeight } = document.body;
                     window.scrollBy(0, distance);
                     totalHeight += distance;
 
@@ -206,21 +91,115 @@ async function autoScroll(page) {
     }
 }
 
-const sendMessage = async (page, receiver) => {
+(async () => {
+    console.info('Starting Execution...');
 
-    await page.click('[data-click="home_icon"]');
+    let profileData = {};
+    const profileFilePath = `friend_${config.username}.json`;
 
-    await page.goto('https://www.facebook.com/messages/');
-    
-    await page.click('[placeholder="Search Messenger"]');
+    try {
+        if (fs.existsSync(profileFilePath)) {
+            // file exists
+            console.log('Reading From Existing File.');
+            const rawdata = fs.readFileSync(profileFilePath);
+            profileData = JSON.parse(rawdata);
+        } else {
+            console.log('No Existing File Found!!!');
+        }
+    } catch (err) {
+        console.error(err);
+    }
 
-    await page.keyboard.type(receiver, {delay: 0});
+    let browser;
+    if (config.chromiumPath && config.chromiumPath !== '') {
+        console.log('Custom chromium path found');
+        browser = await puppeteer.launch({
+            executablePath: config.chromiumPath,
+            headless: config.headless,
+            slowMo: 0 // slow down by 30 ms
+        });
+    } else {
+        console.log('Opening with default chromium path');
+        browser = await puppeteer.launch({
+            headless: config.headless,
+            slowMo: 0 // slow down by 30 ms
+        });
+    }
 
-    await sleep(10000);
+    const context = browser.defaultBrowserContext();
+    context.overridePermissions('https://www.facebook.com', ['notifications']);
 
-    await page.keyboard.press('ArrowDown');
+    const page = await browser.newPage();
+    await page.goto('https://facebook.com');
+    await page.setViewport({
+        width: 1500,
+        height: 1000,
+        deviceScaleFactor: 1
+    });
 
-    await page.keyboard.press('Enter');
+    // enter email address
+    await page.click('[id="email"]');
+    await page.keyboard.type(config.username, { delay: 0 });
 
-    await page.keyboard.type('Hello From Auto Bot!\n');
-}
+    // enter password
+    await page.click('[id="pass"]');
+    await page.keyboard.type(config.password, { delay: 0 });
+
+    // click on Log In
+    await page.click('[value="Log In"]');
+
+    console.log('Login Done!!!');
+
+    // For old UI
+    // await sleep(10000);
+
+    // For new UI
+    await page.waitForSelector("[href='/me/']", { visiable: true });
+
+    // goto friend list
+    await page.goto('https://www.facebook.com/me/friends');
+
+    await sleep(3000);
+
+    if (!profileData.allProfileFound) {
+        const startDate = new Date();
+
+        // Do your operations
+        await autoScroll(page);
+
+        const endDate = new Date();
+
+        const seconds = (endDate.getTime() - startDate.getTime()) / 1000;
+
+        console.log('Starting to fetch allHrefs');
+
+        const allHrefs = await page.$$eval('a', (anchors) => anchors.map((anchor) => anchor.href));
+        const ownerIdName = getOwnerIdName(page.url());
+
+        console.log('allHrefs length:', allHrefs.length);
+
+        const friendProfileHrefs = filterValidFriendProfileHrefs(allHrefs, ownerIdName);
+
+        // writing friend profile links to a file
+        if (friendProfileHrefs && friendProfileHrefs.length > 0) {
+            profileData.allProfileFound = true;
+        } else {
+            profileData.allProfileFound = false;
+        }
+
+        profileData.profileLinkSearchTime = seconds;
+        profileData.profiles = friendProfileHrefs;
+
+        console.log('Writig to file start');
+
+        fs.writeFileSync(profileFilePath, JSON.stringify(profileData, null, 4));
+
+        console.log('Writig to file end');
+    } else {
+        console.log('All friend profile link retrieved already');
+    }
+
+    await browser.close();
+
+    console.log('Ending Execution.');
+})();

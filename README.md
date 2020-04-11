@@ -2,22 +2,18 @@
 
 Crete `credential.json` file in root directory by mimicking `credential-sample.json` file and populate the properties.
 
-___
+## Format your chages with ESLint
 
-Run following in the reps to ignore `credential.json` local changes:
+Run following command to see the errors and warnings for a file:
 
-```
-git update-index --skip-worktree credential.json
-```
-
-Ref: https://stackoverflow.com/questions/1753070/how-do-i-configure-git-to-ignore-some-files-locally
-
-___
-
-To list files ignored with `skip-worktree`:
-
-```
-git ls-files -v . | grep ^S
+```sh
+./node_modules/.bin/eslint <filename>
 ```
 
-Ref: https://stackoverflow.com/questions/42363881/how-to-list-files-ignored-with-skip-worktree
+Run following command to fix errors and warnings automatically in a file:
+
+```
+./node_modules/.bin/eslint <filename>
+```
+
+To add/edit/modify linting rules, make the changes in .eslint.js file.
