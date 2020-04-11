@@ -6,7 +6,7 @@ Crete `credential.json` file in root directory by mimicking `credential-sample.j
 
 Run following command to see the errors and warnings for a file:
 
-```sh
+```
 ./node_modules/.bin/eslint <filename>
 ```
 
