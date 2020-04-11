@@ -1,3 +1,5 @@
 node_modules
 credential.json
 friend-profiles.json
+friend_*.json
+.DS_Store
