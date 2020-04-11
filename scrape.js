@@ -1,10 +1,10 @@
+require('console-stamp')(console, { pattern: 'dd/mm/yyyy HH:MM:ss.l' });
+
 const puppeteer = require('puppeteer');
 const config = require('./credential.json');
 
 (async () => {
-    const startTime = Date.now();
-
-    console.log("Starting Execution at", Date(startTime));
+    console.log("Starting Execution...");
 
     let browser;
     if (config.chromiumPath && config.chromiumPath !== '') {    
@@ -69,10 +69,7 @@ const config = require('./credential.json');
 
     await browser.close();
 
-    const endTime = Date.now();
-
-    console.log("Ending Execution at ", Date(endTime));
-    console.log("Time Taken: " + (endTime - startTime) / 1000.00 + " seconds.");
+    console.log("Ending Execution.");
 })();
 
 const sleep = (ms = 1000) => {
@@ -86,6 +83,8 @@ const getOwnerIdName = (url) => {
 }
 
 const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
+    console.log("Starting filterValidFriendProfileHrefs...");
+
     const uniqueFriendProfileHrefs = new Set();
 
     const validLink = href => !!href;
@@ -116,6 +115,7 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
             'profile',
             'find-friends',
             'notes',
+            'permalink',
             '?'
         ];
 
@@ -137,6 +137,8 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
 }
 
 async function autoScroll(page) {
+    console.log("Starting autoScroll...");
+
     await page.evaluate(async () => {
         await new Promise((resolve, reject) => {
             let totalHeight = 0;
