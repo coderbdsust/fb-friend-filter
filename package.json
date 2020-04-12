@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "console-stamp": "^0.2.9",
+    "lodash": "^4.17.15",
     "puppeteer": "^2.1.1"
   },
   "devDependencies": {
