@@ -2,13 +2,13 @@
 require('console-stamp')(console, {
     pattern: 'dd/mm/yyyy HH:MM:ss.l'
 });
+
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const config = require('./credential.json');
-
-const filePath = `./friend_${config.username}.json`;
+const constants = require('./constants.js');
 // eslint-disable-next-line import/no-dynamic-require
-const friends = require(filePath);
+const friends = require(`./friend_${config.username}.json`);
 
 const sleep = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -40,26 +40,9 @@ const parseInfo = (profileURL, spanTexts, titles) => {
     console.info('spnatexts', JSON.stringify(spanTexts, null, 4));
     console.info('titles', JSON.stringify(titles, null, 4));
 
-    const info = {
-        handle: profileURL.split('https://www.facebook.com/')[1],
-        name: null,
-        gender: null,
-        birthDate: null,
-        birthYear: null,
-        language: null,
-        religion: null,
-        currentLocation: null,
-        homeLocation: null,
-        joined: null,
-        mutualFriends: null,
-        followers: null,
-        interestedIn: null,
-        linkedIn: null,
-        googleTalk: null,
-        skype: null,
-        familyMember: [],
-        mobile: []
-    };
+    // doing deep-copy otherwise all info element will be same due to reference
+    const info = JSON.parse(JSON.stringify(constants.DefaultInfo));
+    info.handle = profileURL.split('https://www.facebook.com/')[1];
 
     const familyMembers = new Set();
     const mobiles = new Set();
@@ -87,16 +70,7 @@ const parseInfo = (profileURL, spanTexts, titles) => {
                 info.linkedIn = spanTexts[i - 1];
             } else if (spanTexts[i] === 'Mobile') {
                 mobiles.add(spanTexts[i - 1]);
-            } else if (
-                spanTexts[i] === 'Uncle'
-                || spanTexts[i] === 'Cousin'
-                || spanTexts[i] === 'Brother'
-                || spanTexts[i] === 'Sister'
-                || spanTexts[i] === 'Nephew'
-                || spanTexts[i] === 'Family member'
-                || spanTexts[i] === 'Grandson'
-                || spanTexts[i] === 'Brother-in-law'
-            ) {
+            } else if (constants.FamilyMemberCategories.includes(spanTexts[i])) {
                 familyMembers.add(spanTexts[i - 1]);
             } else if (spanTexts[i] === 'Current City') {
                 info.currentLocation = spanTexts[i - 1];
@@ -129,16 +103,9 @@ const parseInfo = (profileURL, spanTexts, titles) => {
     }
 
     try {
-        info.name = titles.filter((title) => {
-            return !([
-                'About',
-                'Earlier',
-                'Friends',
-                'New',
-                'Notifications',
-                'Messenger'
-            ].includes(title));
-        }).sort((a, b) => b.length - a.length)[0];
+        info.name = titles
+            .filter((title) => !(constants.TitleToExclude.includes(title)))
+            .sort((a, b) => b.length - a.length)[0];
     } catch (reason) {
         console.error(reason);
     }
@@ -151,7 +118,6 @@ const pad = (number, length, inRight = true) => {
     while (str.length < length) {
         str = inRight ? ` ${str}` : `${str} `;
     }
-
     return str;
 };
 
@@ -168,15 +134,7 @@ const browseProfiles = async (page) => {
     const infos = [];
     const length = friends.profiles.length;
 
-    const profileFeatures = [
-        'about_overview',
-        'about_work_and_education',
-        'about_places',
-        'about_contact_and_basic_info',
-        'about_family_and_relationships',
-        'about_details',
-        'about_life_events'
-    ];
+    const profileFeatures = constants.ProfileFeatures;
 
     try {
         for (let i = 0; i < friends.profiles.length; i++) {

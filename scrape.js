@@ -1,8 +1,11 @@
 require('console-stamp')(console, { pattern: 'dd/mm/yyyy HH:MM:ss.l' });
+
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const _ = require('lodash');
+
 const config = require('./credential.json');
+const constants = require('./constants.js');
 
 const sleep = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -22,33 +25,7 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
     const isHomePage = (href) => href === 'https://www.facebook.com/';
     const isOwnerRelatedPage = (href) => href.includes(ownerIdName);
     const isFeaturePage = (href) => {
-        const features = [
-            '?',
-            'bookmarks',
-            'donate',
-            'events',
-            'find-friends',
-            'friends',
-            'gaming',
-            'groups',
-            'groupslanding',
-            'marketplace',
-            'me/',
-            'memories',
-            'messages',
-            'mutual_friends',
-            'notes',
-            'notifications',
-            'pages',
-            'permalink',
-            'photo',
-            'posts',
-            'settings',
-            'stories',
-            'videos',
-            'watch'
-        ];
-
+        const features = constants.FeaturesToExclude;
         const matchesHref = (feature) => href.includes(`/${feature}`);
         return features.some(matchesHref);
     };
