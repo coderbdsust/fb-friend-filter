@@ -19,8 +19,9 @@ const parseCommaSeparatedNumber = (numberString) => {
     return parseInt(result, 10);
 };
 
-const parseInfo = (spanTexts) => {
+const parseInfo = (spanTexts, url) => {
     const info = {
+        handle: url.split('https://www.facebook.com/')[1],
         name: null,
         institutions: [],
         currentLocation: null,
@@ -58,20 +59,35 @@ const parseInfo = (spanTexts) => {
     return info;
 };
 
+const pad = (number, length, inRight = true) => {
+    let str = number.toString(10);
+    while (str.length < length) {
+        str = inRight ? ` ${str}` : `${str} `;
+    }
+
+    return str;
+};
+
 const browseProfiles = async (page) => {
     const infos = [];
+    const length = friends.profiles.length;
 
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < friends.profiles.length; i++) {
-        console.info('Going to', friends.profiles[i]);
-        // eslint-disable-next-line no-await-in-loop
-        await page.goto(friends.profiles[i]);
-        // eslint-disable-next-line no-await-in-loop
-        await sleep(3000);
+    try {
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < length; i++) {
+            console.info(` [${pad(i + 1, 4)} / ${pad(length, 4, false)} ] Going to ${friends.profiles[i]}`);
+            // eslint-disable-next-line no-await-in-loop
+            await page.goto(friends.profiles[i]);
+            // eslint-disable-next-line no-await-in-loop
+            await sleep(3000);
 
-        // eslint-disable-next-line no-await-in-loop
-        const spanTexts = await page.$$eval('span', (spans) => spans.map((span) => span.textContent));
-        infos.push(parseInfo(spanTexts));
+            // eslint-disable-next-line no-await-in-loop
+            const spanTexts = await page.$$eval('span', (spans) => spans.map((span) => span.textContent));
+
+            infos.push(parseInfo(spanTexts, page.url()));
+        }
+    } catch (reason) {
+        console.error(reason);
     }
 
     const knowledgebaseFilePath = `knowledgebase_${config.username}.json`;
