@@ -168,6 +168,11 @@ const browseProfiles = async (page) => {
             let spanInfos = [];
             let h1Infos = [];
 
+            await page.goto(profileLink);
+            await sleep(3000);
+            let spanTexts = await page.$$eval('span', (spans) => spans.map((span) => span.textContent).filter((text) => text));
+            spanInfos = spanInfos.concat(spanTexts);
+
             for (let f = 0; f < profileFeatures.length; f++) {
                 console.log('Feature page: ', profileFeatures[f]);
                 if (profileLink.includes('profile.php?')) {
@@ -176,13 +181,11 @@ const browseProfiles = async (page) => {
                     await page.goto(`${profileLink}/${profileFeatures[f]}`);
                 }
                 await sleep(3000);
-                let spanTexts = await page.$$eval('span', (spans) => spans.map((span) => span.textContent));
-                spanTexts = await spanTexts.filter((text) => text);
+                spanTexts = await page.$$eval('span', (spans) => spans.map((span) => span.textContent).filter((text) => text));
                 spanInfos = spanInfos.concat(spanTexts);
             }
 
-            let h1Texts = await page.$$eval('h1', (h1Tags) => h1Tags.map((h1) => h1.textContent));
-            h1Texts = await h1Texts.filter((text) => text);
+            const h1Texts = await page.$$eval('h1', (h1Tags) => h1Tags.map((h1) => h1.textContent).filter((text) => text));
             h1Infos = h1Infos.concat(h1Texts);
 
             spanInfos = await immediateSecondOcurranceWordRemove(spanInfos);
