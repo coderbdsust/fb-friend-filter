@@ -21,6 +21,16 @@ const parseCommaSeparatedNumber = (numberString) => {
     return parseInt(result, 10);
 };
 
+const parseMarriageInfo = (text) => {
+    const [beforeSince, afterSince] = text.split(' since ');
+    const spouseName = beforeSince.split('Married to ')[1];
+    const marriageDate = afterSince;
+    return {
+        spouseName,
+        marriageDate
+    };
+};
+
 const parseInfo = (profileURL, spanTexts, titles) => {
     console.log('Parsing Info');
     console.log('Profile URL', profileURL);
@@ -38,7 +48,6 @@ const parseInfo = (profileURL, spanTexts, titles) => {
         birthYear: null,
         language: null,
         religion: null,
-        institutions: [],
         currentLocation: null,
         homeLocation: null,
         joined: null,
@@ -54,6 +63,7 @@ const parseInfo = (profileURL, spanTexts, titles) => {
 
     const familyMembers = new Set();
     const mobiles = new Set();
+    const institutions = new Set();
 
     try {
         for (let i = 1; i < spanTexts.length; i++) {
@@ -84,6 +94,8 @@ const parseInfo = (profileURL, spanTexts, titles) => {
                 || spanTexts[i] === 'Sister'
                 || spanTexts[i] === 'Nephew'
                 || spanTexts[i] === 'Family member'
+                || spanTexts[i] === 'Grandson'
+                || spanTexts[i] === 'Brother-in-law'
             ) {
                 familyMembers.add(spanTexts[i - 1]);
             } else if (spanTexts[i] === 'Current City') {
@@ -92,9 +104,9 @@ const parseInfo = (profileURL, spanTexts, titles) => {
                 info.homeLocation = spanTexts[i - 1];
             } else if (spanTexts[i].includes('Studies ')
                     || spanTexts[i].includes('Studied ')) {
-                info.institutions.push(spanTexts[i].split(' at ')[1]);
+                institutions.add(spanTexts[i].split(' at ')[1]);
             } else if (spanTexts[i].includes('Went to ')) {
-                info.institutions.push(spanTexts[i].split('Went to ')[1]);
+                institutions.add(spanTexts[i].split('Went to ')[1]);
             } else if (spanTexts[i].includes('Lives in ')) {
                 info.currentLocation = spanTexts[i].split('Lives in ')[1];
             } else if (spanTexts[i].includes('Joined ')) {
@@ -103,8 +115,13 @@ const parseInfo = (profileURL, spanTexts, titles) => {
                 info.mutualFriends = parseInt(spanTexts[i], 10);
             } else if (spanTexts[i].includes('Followed by ')) {
                 info.followers = parseCommaSeparatedNumber(spanTexts[i].split(' ')[2]);
+            } else if (spanTexts[i].includes('Married to ') && spanTexts[i].includes(' since ')) {
+                const marriageInfo = parseMarriageInfo(spanTexts[i]);
+                info.spouseName = marriageInfo.spouseName;
+                info.marriageDate = marriageInfo.marriageDate;
             }
         }
+        info.institutions = [...institutions];
         info.familyMember = [...familyMembers];
         info.mobile = [...mobiles];
     } catch (reason) {
