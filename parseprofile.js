@@ -131,6 +131,8 @@ const immediateSecondOcurranceWordRemove = async (items) => {
 };
 
 const browseProfiles = async (page) => {
+    const knowledgebaseFilePath = `knowledgebase_${config.username}.json`;
+
     const infos = [];
     const length = friends.profiles.length;
 
@@ -165,12 +167,13 @@ const browseProfiles = async (page) => {
 
             spanInfos = await immediateSecondOcurranceWordRemove(spanInfos);
             infos.push(parseInfo(profileLink, spanInfos, h1Infos));
+
+            fs.writeFileSync(knowledgebaseFilePath, JSON.stringify({ infos }, null, 4));
         }
     } catch (reason) {
         console.error(reason);
     }
 
-    const knowledgebaseFilePath = `knowledgebase_${config.username}.json`;
     fs.writeFileSync(knowledgebaseFilePath, JSON.stringify({ infos }, null, 4));
 };
 
