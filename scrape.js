@@ -43,7 +43,6 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
             'permalink',
             'photo',
             'posts',
-            'profile',
             'settings',
             'stories',
             'videos',

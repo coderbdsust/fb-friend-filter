@@ -19,6 +19,7 @@ module.exports = {
     "indent": ["error", 4],
     "comma-dangle": ["error", "never"],
     "max-len": [2, {"code": 150, "tabWidth": 4, "ignoreUrls": true}],
-    "prefer-destructuring": ["error", {"object": false, "array": false}]
+    "prefer-destructuring": ["error", {"object": false, "array": false}],
+    'no-plusplus': [2, { allowForLoopAfterthoughts: true }]
   },
 };

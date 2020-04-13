@@ -1,4 +1,7 @@
-require('console-stamp')(console, { pattern: 'dd/mm/yyyy HH:MM:ss.l' });
+/* eslint-disable no-await-in-loop */
+require('console-stamp')(console, {
+    pattern: 'dd/mm/yyyy HH:MM:ss.l'
+});
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const config = require('./credential.json');
@@ -12,50 +15,117 @@ const sleep = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
 const parseCommaSeparatedNumber = (numberString) => {
     const splitted = numberString.split(',');
     let result = '';
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < splitted.length; i++) {
         result += splitted[i];
     }
     return parseInt(result, 10);
 };
 
-const parseInfo = (spanTexts, url) => {
+const parseInfo = (profileURL, spanTexts, titles) => {
+    console.log('Parsing Info');
+    console.log('Profile URL', profileURL);
+    console.log('Span text counts ', spanTexts.length);
+    console.log('Title counts ', titles.length);
+
+    console.info('spnatexts', JSON.stringify(spanTexts, null, 4));
+    console.info('titles', JSON.stringify(titles, null, 4));
+
     const info = {
-        handle: url.split('https://www.facebook.com/')[1],
+        handle: profileURL.split('https://www.facebook.com/')[1],
         name: null,
+        gender: null,
+        birthDate: null,
+        birthYear: null,
+        language: null,
+        religion: null,
         institutions: [],
         currentLocation: null,
+        homeLocation: null,
         joined: null,
         mutualFriends: null,
         followers: null,
-        from: null
+        interestedIn: null,
+        linkedIn: null,
+        googleTalk: null,
+        skype: null,
+        familyMember: [],
+        mobile: []
     };
 
+    const familyMembers = new Set();
+    const mobiles = new Set();
+
     try {
-        spanTexts.forEach((text, index) => {
-            if (index && spanTexts[index - 1] === 'More') {
-                info.name = text;
-            } else if (text.includes('Studies ')
-                       || text.includes('Studied ')) {
-                info.institutions.push(text.split(' at ')[1]);
-            } else if (text.includes('Went to ')) {
-                info.institutions.push(text.split('Went to ')[1]);
-            } else if (text.includes('Lives in ')) {
-                info.currentLocation = text.split('Lives in ')[1];
-            } else if (text.includes('Joined ')) {
-                info.joined = text.split('Joined ')[1];
-            } else if (text.includes(' mutual friends')) {
-                info.mutualFriends = parseInt(text, 10);
-            } else if (text.includes('Followed by ')) {
-                info.followers = parseCommaSeparatedNumber(text.split(' ')[2]);
-            } else if (text.includes('From ')) {
-                info.from = text.split('From ')[1];
+        for (let i = 1; i < spanTexts.length; i++) {
+            if (spanTexts[i] === 'Religious Views') {
+                info.religion = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Interested In') {
+                info.interestedIn = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Languages') {
+                info.language = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Birth Year') {
+                info.birthYear = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Birth Date' || spanTexts[i] === 'Birthday') {
+                info.birthDate = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Gender') {
+                info.gender = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Skype') {
+                info.skype = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Google Talk') {
+                info.googleTalk = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'LinkedIn') {
+                info.linkedIn = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Mobile') {
+                mobiles.add(spanTexts[i - 1]);
+            } else if (
+                spanTexts[i] === 'Uncle'
+                || spanTexts[i] === 'Cousin'
+                || spanTexts[i] === 'Brother'
+                || spanTexts[i] === 'Sister'
+                || spanTexts[i] === 'Nephew'
+                || spanTexts[i] === 'Family member'
+            ) {
+                familyMembers.add(spanTexts[i - 1]);
+            } else if (spanTexts[i] === 'Current City') {
+                info.currentLocation = spanTexts[i - 1];
+            } else if (spanTexts[i] === 'Hometown') {
+                info.homeLocation = spanTexts[i - 1];
+            } else if (spanTexts[i].includes('Studies ')
+                    || spanTexts[i].includes('Studied ')) {
+                info.institutions.push(spanTexts[i].split(' at ')[1]);
+            } else if (spanTexts[i].includes('Went to ')) {
+                info.institutions.push(spanTexts[i].split('Went to ')[1]);
+            } else if (spanTexts[i].includes('Lives in ')) {
+                info.currentLocation = spanTexts[i].split('Lives in ')[1];
+            } else if (spanTexts[i].includes('Joined ')) {
+                info.joined = spanTexts[i].split('Joined ')[1];
+            } else if (spanTexts[i].includes(' mutual friends')) {
+                info.mutualFriends = parseInt(spanTexts[i], 10);
+            } else if (spanTexts[i].includes('Followed by ')) {
+                info.followers = parseCommaSeparatedNumber(spanTexts[i].split(' ')[2]);
             }
-        });
+        }
+        info.familyMember = [...familyMembers];
+        info.mobile = [...mobiles];
     } catch (reason) {
         console.error(reason);
     }
 
+    try {
+        info.name = titles.filter((title) => {
+            return !([
+                'About',
+                'Earlier',
+                'Friends',
+                'New',
+                'Notifications',
+                'Messenger'
+            ].includes(title));
+        }).sort((a, b) => b.length - a.length)[0];
+    } catch (reason) {
+        console.error(reason);
+    }
+    console.log(info);
     return info;
 };
 
@@ -68,23 +138,55 @@ const pad = (number, length, inRight = true) => {
     return str;
 };
 
+const immediateSecondOcurranceWordRemove = async (items) => {
+    for (let i = 0; i < items.length - 1; i++) {
+        if (items[i] === items[i + 1]) {
+            items.splice(i, 1);
+        }
+    }
+    return items;
+};
+
 const browseProfiles = async (page) => {
     const infos = [];
     const length = friends.profiles.length;
 
+    const profileFeatures = [
+        'about_overview',
+        'about_work_and_education',
+        'about_places',
+        'about_contact_and_basic_info',
+        'about_family_and_relationships',
+        'about_details',
+        'about_life_events'
+    ];
+
     try {
-        // eslint-disable-next-line no-plusplus
-        for (let i = 0; i < length; i++) {
+        for (let i = 0; i < friends.profiles.length; i++) {
+            const profileLink = friends.profiles[i];
             console.info(` [${pad(i + 1, 4)} / ${pad(length, 4, false)} ] Going to ${friends.profiles[i]}`);
-            // eslint-disable-next-line no-await-in-loop
-            await page.goto(friends.profiles[i]);
-            // eslint-disable-next-line no-await-in-loop
-            await sleep(3000);
+            let spanInfos = [];
+            let h1Infos = [];
 
-            // eslint-disable-next-line no-await-in-loop
-            const spanTexts = await page.$$eval('span', (spans) => spans.map((span) => span.textContent));
+            for (let f = 0; f < profileFeatures.length; f++) {
+                console.log('Feature page: ', profileFeatures[f]);
+                if (profileLink.includes('profile.php?')) {
+                    await page.goto(`${profileLink}&sk=${profileFeatures[f]}`);
+                } else {
+                    await page.goto(`${profileLink}/${profileFeatures[f]}`);
+                }
+                await sleep(3000);
+                let spanTexts = await page.$$eval('span', (spans) => spans.map((span) => span.textContent));
+                spanTexts = await spanTexts.filter((text) => text);
+                spanInfos = spanInfos.concat(spanTexts);
+            }
 
-            infos.push(parseInfo(spanTexts, page.url()));
+            let h1Texts = await page.$$eval('h1', (h1Tags) => h1Tags.map((h1) => h1.textContent));
+            h1Texts = await h1Texts.filter((text) => text);
+            h1Infos = h1Infos.concat(h1Texts);
+
+            spanInfos = await immediateSecondOcurranceWordRemove(spanInfos);
+            infos.push(parseInfo(profileLink, spanInfos, h1Infos));
         }
     } catch (reason) {
         console.error(reason);
@@ -124,11 +226,15 @@ const browseProfiles = async (page) => {
 
     // enter email address
     await page.click('[id="email"]');
-    await page.keyboard.type(config.username, { delay: 0 });
+    await page.keyboard.type(config.username, {
+        delay: 0
+    });
 
     // enter password
     await page.click('[id="pass"]');
-    await page.keyboard.type(config.password, { delay: 0 });
+    await page.keyboard.type(config.password, {
+        delay: 0
+    });
 
     // click on Log In
     await page.click('[value="Log In"]');
@@ -136,7 +242,9 @@ const browseProfiles = async (page) => {
     console.log('Login Done!!!');
 
     // For new UI
-    await page.waitForSelector("[href='/me/']", { visiable: true });
+    await page.waitForSelector("[href='/me/']", {
+        visiable: true
+    });
 
     await sleep(3000);
 
