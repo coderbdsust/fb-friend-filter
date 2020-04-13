@@ -6,7 +6,7 @@ require('console-stamp')(console, {
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const config = require('./credential.json');
-const constants = require('./constants.js');
+const Constants = require('./constants.js');
 // eslint-disable-next-line import/no-dynamic-require
 const friends = require(`./friend_${config.username}.json`);
 
@@ -41,7 +41,7 @@ const parseInfo = (profileURL, spanTexts, titles) => {
     console.info('titles', JSON.stringify(titles, null, 4));
 
     // doing deep-copy otherwise all info element will be same due to reference
-    const info = JSON.parse(JSON.stringify(constants.DefaultInfo));
+    const info = JSON.parse(JSON.stringify(Constants.DEFAULT_INFO));
     info.handle = profileURL.split('https://www.facebook.com/')[1];
 
     const familyMembers = new Set();
@@ -70,7 +70,7 @@ const parseInfo = (profileURL, spanTexts, titles) => {
                 info.linkedIn = spanTexts[i - 1];
             } else if (spanTexts[i] === 'Mobile') {
                 mobiles.add(spanTexts[i - 1]);
-            } else if (constants.FamilyMemberCategories.includes(spanTexts[i])) {
+            } else if (Constants.FAMILY_MEMBER_CATEGORIES.includes(spanTexts[i])) {
                 familyMembers.add(spanTexts[i - 1]);
             } else if (spanTexts[i] === 'Current City') {
                 info.currentLocation = spanTexts[i - 1];
@@ -104,7 +104,7 @@ const parseInfo = (profileURL, spanTexts, titles) => {
 
     try {
         info.name = titles
-            .filter((title) => !(constants.TitleToExclude.includes(title)))
+            .filter((title) => !(Constants.TITLES_TO_EXCLUDE.includes(title)))
             .sort((a, b) => b.length - a.length)[0];
     } catch (reason) {
         console.error(reason);
@@ -136,7 +136,7 @@ const browseProfiles = async (page) => {
     const infos = [];
     const length = friends.profiles.length;
 
-    const profileFeatures = constants.ProfileFeatures;
+    const profileFeatures = Constants.PROFILE_FEATURES;
 
     try {
         for (let i = 0; i < friends.profiles.length; i++) {

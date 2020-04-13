@@ -5,7 +5,7 @@ const puppeteer = require('puppeteer');
 const _ = require('lodash');
 
 const config = require('./credential.json');
-const constants = require('./constants.js');
+const Constants = require('./constants.js');
 
 const sleep = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -25,7 +25,7 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
     const isHomePage = (href) => href === 'https://www.facebook.com/';
     const isOwnerRelatedPage = (href) => href.includes(ownerIdName);
     const isFeaturePage = (href) => {
-        const features = constants.FeaturesToExclude;
+        const features = Constants.FEATURES_TO_EXCLUDE;
         const matchesHref = (feature) => href.includes(`/${feature}`);
         return features.some(matchesHref);
     };

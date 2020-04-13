@@ -66,7 +66,7 @@ const profileFeatures = [
     'about_life_events'
 ];
 
-const titleToExclude = [
+const titlesToExclude = [
     'About',
     'Earlier',
     'Friends',
@@ -75,8 +75,8 @@ const titleToExclude = [
     'Messenger'
 ];
 
-exports.DefaultInfo = defaultInfo;
-exports.FamilyMemberCategories = familyMemberCategories;
-exports.FeaturesToExclude = featuresToExclude;
-exports.ProfileFeatures = profileFeatures;
-exports.TitleToExclude = titleToExclude;
+exports.DEFAULT_INFO = defaultInfo;
+exports.FAMILY_MEMBER_CATEGORIES = familyMemberCategories;
+exports.FEATURES_TO_EXCLUDE = featuresToExclude;
+exports.PROFILE_FEATURES = profileFeatures;
+exports.TITLES_TO_EXCLUDE = titlesToExclude;
