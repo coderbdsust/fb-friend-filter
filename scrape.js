@@ -24,6 +24,7 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
     const isMutualFriendPage = (href) => href.includes('friends_mutual');
     const isHomePage = (href) => href === 'https://www.facebook.com/';
     const isOwnerRelatedPage = (href) => href.includes(ownerIdName);
+    const isCelebrityPage = (href) => href.includes('?viewas=');
     const isFeaturePage = (href) => {
         const features = Constants.FEATURES_TO_EXCLUDE;
         const matchesHref = (feature) => href.includes(`/${feature}`);
@@ -35,7 +36,8 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
             && !isMutualFriendPage(href)
             && !isHomePage(href)
             && !isOwnerRelatedPage(href)
-            && !isFeaturePage(href)) {
+            && !isFeaturePage(href)
+            && !isCelebrityPage(href)) {
             uniqueFriendProfileHrefs.add(href);
         }
     });
@@ -157,6 +159,7 @@ async function autoScroll(page) {
         console.log('Starting to fetch allHrefs');
 
         const allHrefs = await page.$$eval('a', (anchors) => anchors.map((anchor) => anchor.href));
+
         const ownerIdName = getOwnerIdName(page.url());
 
         console.log('allHrefs length:', allHrefs.length);
