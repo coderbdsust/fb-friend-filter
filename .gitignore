@@ -4,3 +4,4 @@ friend-profiles.json
 knowledgebase_*.json
 friend_*.json
 .DS_Store
+output.json

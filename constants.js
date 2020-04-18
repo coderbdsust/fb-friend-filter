@@ -1,4 +1,5 @@
 const defaultInfo = {
+    override: false,
     handle: null,
     name: null,
     gender: null,
@@ -75,8 +76,14 @@ const titlesToExclude = [
     'Messenger'
 ];
 
+const pageLoadingStyle = {
+    waitLoad: true,
+    waitNetworkIdle: true
+};
+
 exports.DEFAULT_INFO = defaultInfo;
 exports.FAMILY_MEMBER_CATEGORIES = familyMemberCategories;
 exports.FEATURES_TO_EXCLUDE = featuresToExclude;
 exports.PROFILE_FEATURES = profileFeatures;
 exports.TITLES_TO_EXCLUDE = titlesToExclude;
+exports.PAGE_LOADING_STYLE = pageLoadingStyle;
