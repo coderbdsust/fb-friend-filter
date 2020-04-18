@@ -42,10 +42,7 @@ const getHandle = (profileURL) => {
     return profileURL.split('https://www.facebook.com/')[1];
 };
 
-const parseInfo = (profileURL, spanTexts, titles) => {
-    spanTexts = basicFilter(spanTexts);
-    titles = basicFilter(titles);
-
+const parseInfo = async (profileURL, spanTexts, titles) => {
     console.log('Parsing Info');
     console.log('Profile URL', profileURL);
     console.log('Span text counts ', spanTexts.length);
@@ -217,7 +214,7 @@ const browseProfiles = async (page) => {
                     console.info(`Information overriding for handle : ${handle}`);
                 }
 
-                knowledgeInfo.profileInfos[handle] = parseInfo(profileLink, spanInfos, h1Infos);
+                knowledgeInfo.profileInfos[handle] = await parseInfo(profileLink, spanInfos, h1Infos);
                 fs.writeFileSync(knowledgebaseFilePath, JSON.stringify(knowledgeInfo, null, 4));
             } else {
                 console.info(`Already have info using handle : ${handle}, Ignoring this handle...`);
