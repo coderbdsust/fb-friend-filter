@@ -23,8 +23,8 @@ const filterValidFriendProfileHrefs = (allHrefs, ownerIdName) => {
     const validLink = (href) => !!href;
     const isMutualFriendPage = (href) => href.includes('friends_mutual');
     const isHomePage = (href) => href === 'https://www.facebook.com/';
-    const isOwnerRelatedPage = (href) => href.includes(ownerIdName);
-    const isCelebrityPage = (href) => href.includes('?viewas=');
+    const isOwnerRelatedPage = (href) => href.includes(ownerIdName) || href.includes('?viewas=');
+    const isCelebrityPage = (href) => href.charAt(href.length - 1) === '/';
     const isFeaturePage = (href) => {
         const features = Constants.FEATURES_TO_EXCLUDE;
         const matchesHref = (feature) => href.includes(`/${feature}`);
