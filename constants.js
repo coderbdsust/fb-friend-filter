@@ -79,7 +79,8 @@ const titlesToExclude = [
 const pageLoadingStyle = {
     waitLoad: true,
     waitNetworkIdle: true,
-    waitUntil: ['domcontentloaded']
+    waitUntil: ['load', 'domcontentloaded'],
+    timeout: 10000
 };
 
 exports.DEFAULT_INFO = defaultInfo;

@@ -43,6 +43,8 @@ const getHandle = (profileURL) => {
 };
 
 const parseInfo = async (profileURL, spanTexts, titles) => {
+    spanTexts = basicFilter(spanTexts);
+    titles = basicFilter(titles);
     console.log('Parsing Info');
     console.log('Profile URL', profileURL);
     console.log('Span text counts ', spanTexts.length);
