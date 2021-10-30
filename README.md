@@ -1,5 +1,5 @@
 # Facebook Friend's Basic Information Search
-This project is for searching friend from the facebook account with given credentials and collecting the basic accessable data from friend list and save it in a JSON file
+This project is for searching friend from a facebook account with given credentials and collecting the basic accessable data from friend's profile and save it in a JSON file
 
 ## Getting Started
 
