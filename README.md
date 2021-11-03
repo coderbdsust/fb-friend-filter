@@ -73,7 +73,7 @@ Run following command to fix errors and warnings automatically in a file:
 ## Technology
 
 * [Node](https://nodejs.org/en/ "Node JS")
-* [Chrowmium](https://www.chromium.org/ "Chromium")
+* [Chromium](https://www.chromium.org/ "Chromium")
 
 ## Developers
 
