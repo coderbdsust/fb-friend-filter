@@ -1,6 +1,10 @@
 # Facebook Friend's Basic Information Search
 This project is for searching friend from a facebook account with given credentials and collecting the basic accessable data from friend's profile and save it in a JSON file
 
+## Prerequisite
+
+* Need to install `NodeJS` software in the machine for running the `JS` file.
+
 ## Getting Started
 
 Create `credential.json` file in root directory by mimicking `credential-sample.json` file and populate the properties.
@@ -55,21 +59,6 @@ Create `credential.json` file in root directory by mimicking `credential-sample.
     }
 }
 ```
-
-## Format your changes with ESLint
-
-Run following command to see the errors and warnings for a file:
-
-```
-./node_modules/.bin/eslint <filename>
-```
-
-Run following command to fix errors and warnings automatically in a file:
-
-```
-./node_modules/.bin/eslint <filename>
-```
-
 ## Technology
 
 * [Node](https://nodejs.org/en/ "Node JS")
